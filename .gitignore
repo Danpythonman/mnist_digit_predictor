@@ -4,3 +4,6 @@ venv/
 # Models
 *.h5
 *.tflite
+
+# Images
+images/

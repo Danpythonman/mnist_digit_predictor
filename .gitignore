@@ -1,0 +1,6 @@
+# Virtual environment
+venv/
+
+# Models
+*.h5
+*.tflite

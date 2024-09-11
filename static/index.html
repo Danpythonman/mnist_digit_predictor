@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Digit Predictor</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <h1>Digit Prediction</h1>
+        <main id="main-content">
+            <div>
+                <h2>Draw Image</h2>
+                <p>
+                    Draw a digit (0 - 9) with your mouse below.
+                </p>
+                <canvas id="can" width="400" height="400"></canvas>
+                <div id="button-div">
+                    <button id="save-canvas-button" size="30">Predict</button>
+                    <button id="clear-canvas-button" size="23">Clear</button>
+                </div>
+            </div>
+            <div>
+                <h2>Prediction</h2>
+                <div id="prediction-text">
+                    <p>
+                        Predicted Number:
+                        <span id="prediction-number"></span>
+                    </p>
+                    <p>
+                        Confidence:
+                        <span id="confidence-number"></span>%
+                    </p>
+                </div>
+                <img id="processed-image">
+            </div>
+        </main>
+        <footer>
+            <div>
+                <a href="https://github.com/Danpythonman/mnist_digit_predictor/tree/master" target="_blank" rel="noopener noreferrer">
+                    <img src="github.svg" alt="GitHub Logo" width="30px">
+                </a>
+                <a href="https://github.com/Danpythonman/mnist_digit_predictor/tree/master" target="_blank" rel="noopener noreferrer">
+                    Source Code
+                </a>
+            </div>
+        </footer>
+        <script src="index.js"></script>
+    </body>
+</html>

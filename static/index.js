@@ -165,7 +165,7 @@ async function saveAndSendCanvasImage() {
         processedImage.style.display = "block";
 
         // Scroll to the prediction section
-        predictionHeader.scrollIntoView();
+        predictionHeader.scrollIntoView(true);
     } catch (error) {
         console.error("Error: ", error);
         alert("An error occurred while sending the image.");

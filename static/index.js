@@ -176,7 +176,7 @@ function handleCanvasEvent(eventType, clientX, clientY) {
         prevX = currX;
         prevY = currY;
         currX = clientX - canvas.offsetLeft;
-        currY = clientY - canvas.offsetTop;
+        currY = clientY - canvas.offsetTop + window.scrollY;
 
         // Set drawing flag
         isDrawing = true;
@@ -194,7 +194,7 @@ function handleCanvasEvent(eventType, clientX, clientY) {
             prevX = currX;
             prevY = currY;
             currX = clientX - canvas.offsetLeft;
-            currY = clientY - canvas.offsetTop;
+            currY = clientY - canvas.offsetTop + window.scrollY;
 
             // Draw to canvas
             drawLineToCanvas();

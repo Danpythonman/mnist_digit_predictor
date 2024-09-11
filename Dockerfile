@@ -32,4 +32,4 @@ RUN pip install --no-cache-dir -r requirements-predicting.txt
 EXPOSE 8000
 
 # Run the Flask server with Gunicorn
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:8081", "app:app"]

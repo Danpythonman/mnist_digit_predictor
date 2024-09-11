@@ -14,6 +14,12 @@ const ctx = canvas.getContext("2d");
 const processedImage = document.getElementById("processed-image");
 
 /**
+ * HTML element of the header of the prediction section (will be used to scroll
+ * to the prediction section).
+ */
+const predictionHeader = document.getElementById("prediction-header")
+
+/**
  * HTML div element to hold the text describing the prediction.
  */
 const predictionText = document.getElementById("prediction-text");
@@ -157,6 +163,9 @@ async function saveAndSendCanvasImage() {
         // Display the processed image from the server
         processedImage.src = `data:image/png;base64,${result.processed_image}`;
         processedImage.style.display = "block";
+
+        // Scroll to the prediction section
+        predictionHeader.scrollIntoView();
     } catch (error) {
         console.error("Error: ", error);
         alert("An error occurred while sending the image.");

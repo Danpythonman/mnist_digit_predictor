@@ -6,7 +6,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/var/www/html
+      - .:/usr/src/app
     networks:
       - my_network
     extra_hosts:

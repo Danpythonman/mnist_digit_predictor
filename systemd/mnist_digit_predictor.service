@@ -1,0 +1,13 @@
+[Unit]
+Description=MNIST Digit Predictor Docker Compose Service
+Requires=docker.service
+After=docker.service
+
+[Service]
+WorkingDirectory=/path/to/mnist_digit_predictor
+ExecStart=/path/to/docker compose up --build
+ExecStop=/path/to/docker compose down
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

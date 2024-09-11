@@ -92,7 +92,8 @@ function drawLineToCanvas() {
 function drawDotToCanvas() {
     ctx.beginPath();
     ctx.fillStyle = brushColor;
-    ctx.fillRect(currX, currY, brushThickness, brushThickness);
+    ctx.arc(currX, currY, brushThickness / 2, 0, 2 * Math.PI);
+    ctx.fill();
     ctx.closePath();
 }
 
@@ -196,8 +197,9 @@ function handleCanvasEvent(eventType, clientX, clientY) {
             currX = clientX - canvas.offsetLeft;
             currY = clientY - canvas.offsetTop + window.scrollY;
 
-            // Draw to canvas
+            // Draw to canvas by drawing a line and a dot at the end of the line
             drawLineToCanvas();
+            drawDotToCanvas();
         }
     } else {
         console.error(`Unknown event type ${eventType}`);

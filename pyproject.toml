@@ -1,0 +1,18 @@
+[project]
+name = "mnist"
+version = "0.0.0"
+description = "MNIST digit predictor."
+authors = [{ name = "Daniel Di Giovanni", email = "dannyjdigio@gmail.com" }]
+dependencies = [
+    "numpy",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

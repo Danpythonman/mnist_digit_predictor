@@ -5,8 +5,12 @@ import torch
 import torch.nn.functional as F
 from torch import Tensor
 
+from mnist.model.dataloader import DataLoaderScheduler
+
 
 DiagnosticList: typing.TypeAlias = typing.List[typing.Tuple[int, float, float, float, float, float]]
+
+DataLoaderType: typing.TypeAlias = typing.Union[DataLoaderScheduler, typing.Tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]]
 
 
 @torch.no_grad()
@@ -93,21 +97,20 @@ def print_diagnostics(
 
 def train(
     model: torch.nn.Module,
-    train_loader: torch.utils.data.DataLoader,
-    val_loader: torch.utils.data.DataLoader,
+    data_loader: DataLoaderType,
     epochs: int,
-    max_lr: float,
-    min_lr: float,
+    optimizer: torch.optim.Optimizer,
+    scheduler: torch.optim.lr_scheduler.LRScheduler,
     flatten: bool = False,
     device: torch.device = None
 ) -> pd.DataFrame:
     '''
-    Trains the model using SGD and a learning rate scheduler.
+    Trains the model using a custom optimizer and learning rate scheduler.
 
     Args:
         model : The model to train.
-        train_loader: DataLoader for training data.
-        val_loader: DataLoader for validation data.
+        data_loader: Either a DataLoaderScheduler or a tuple containing the
+            training dataloader and the validation dataloader.
         epochs: Number of epochs to train.
         max_lr: Initial learning rate.
         min_lr: Final learning rate after scheduling.
@@ -118,9 +121,16 @@ def train(
         DataFrame containing diagnostic information from the training.
     '''
 
-    optimizer = torch.optim.SGD(model.parameters(), lr=max_lr)
-    gamma = (min_lr / max_lr)**(1.0 / epochs)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=gamma)
+    step_data_loader = False
+    if isinstance(data_loader, DataLoaderScheduler):
+        train_loader = data_loader.loader('train')
+        val_loader = data_loader.loader('val')
+        step_data_loader = True
+    elif isinstance(data_loader, tuple):
+        train_loader = data_loader[0]
+        val_loader = data_loader[1]
+    else:
+        raise Exception('Invalid data_loader type')
 
     columns = ['Epoch', 'Learning Rate', 'Training Loss', 'Training Accuracy', 'Validation Loss', 'Validation Accuracy']
     diagnostics: DiagnosticList = []
@@ -157,5 +167,51 @@ def train(
             optimizer.step()
 
         scheduler.step()
+        if step_data_loader:
+            data_loader.step()
 
     return pd.DataFrame(diagnostics, columns=columns)
+
+
+def train_basic_sdg(
+    model: torch.nn.Module,
+    train_loader: torch.utils.data.DataLoader,
+    val_loader: torch.utils.data.DataLoader,
+    epochs: int,
+    max_lr: float,
+    min_lr: float,
+    flatten: bool = False,
+    device: torch.device = None
+) -> pd.DataFrame:
+    '''
+    Trains the model using SGD and a step learning rate scheduler where the
+    learning rate is reduced by the same factor each epoch to get from `max_lr`
+    to `min_lr` in `epochs`.
+
+    Args:
+        model : The model to train.
+        train_loader: DataLoader for training data.
+        val_loader: DataLoader for validation data.
+        epochs: Number of epochs to train.
+        max_lr: Initial learning rate.
+        min_lr: Final learning rate after scheduling.
+        flatten: Whether to flatten input images (for MLPs) or not (for CNNs).
+        device: Device to run training on.
+
+    Returns:
+        DataFrame containing diagnostic information from the training.
+    '''
+
+    optimizer = torch.optim.SGD(model.parameters(), lr=max_lr)
+    gamma = (min_lr / max_lr)**(1.0 / epochs)
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=gamma)
+
+    return train(
+        model=model,
+        data_loader=(train_loader, val_loader),
+        epochs=epochs,
+        optimizer=optimizer,
+        scheduler=scheduler,
+        flatten=flatten,
+        device=device
+    )

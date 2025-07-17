@@ -12,4 +12,5 @@ dependencies:
   - pytorch-cuda
   - torchaudio
   - torchvision
+  - onnx
 prefix: /home/daniel/miniconda3/envs/ml_cuda12.2

@@ -1,3 +1,4 @@
+import abc
 from pathlib import Path
 import typing
 
@@ -28,7 +29,21 @@ def _calculate_current_step_value(
     return x_i
 
 
-class DataLoaderScheduler:
+class DataLoaderScheduler(abc.ABC):
+
+    @abc.abstractmethod
+    def step(self) -> None:
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def loader(
+        self,
+        split: typing.Union[typing.Literal['train'], typing.Literal['val']]
+    ) -> torch.utils.data.DataLoader:
+        raise NotImplementedError()
+
+
+class StepDataLoaderScheduler(DataLoaderScheduler):
     '''
     Schedules and manages MNIST DataLoaders with progressive data augmentation.
 
@@ -100,12 +115,17 @@ class DataLoaderScheduler:
         self.shear_i = 0.0
 
         self.transform = transforms.Compose([
-            transforms.RandomAffine(
-                degrees=(self.degrees_i, self.degrees_i),
-                translate=(self.translate_i, self.translate_i),
-                scale=(self.scale_i, self.scale_i),
-                shear=(self.shear_i, self.shear_i)
-            ),                                        # PIL Image
+            transforms.RandomApply(
+                [
+                    transforms.RandomAffine(
+                        degrees=(self.degrees_i, self.degrees_i),
+                        translate=(self.translate_i, self.translate_i),
+                        scale=(self.scale_i, self.scale_i),
+                        shear=(self.shear_i, self.shear_i)
+                    )
+                ],
+                p=0.75
+            ),                                       # PIL Image
             transforms.ToTensor(),                    # (C, H, W)
             transforms.Normalize((x_mean,), (x_std,)) # (C, H, W)
         ])
@@ -150,6 +170,76 @@ class DataLoaderScheduler:
             _calculate_current_step_value(self.shear_i, -self.shear_f, self.current_step, self.epochs, self.step_size, self.warmup_steps),
             _calculate_current_step_value(self.shear_i, self.shear_f, self.current_step, self.epochs, self.step_size, self.warmup_steps)
         )
+
+    def loader(
+        self,
+        split: typing.Union[typing.Literal['train'], typing.Literal['val']]
+    ) -> torch.utils.data.DataLoader:
+        '''
+        Returns the DataLoader for the specified split.
+
+        Args:
+            split: Which DataLoader to return.
+
+        Returns:
+            The requested DataLoader.
+
+        Raises:
+            Exception: If an invalid split is provided.
+        '''
+
+        if split == 'train':
+            return self.train_loader
+        elif split == 'val':
+            return self.val_loader
+        else:
+            raise Exception(f'Invalid split {split}')
+
+
+class NoOpDataLoaderScheduler(DataLoaderScheduler):
+    '''
+    Data loader scheduler that does nothing when stepped.
+    '''
+
+    transform: transforms.Compose
+
+    train_dataset = datasets.MNIST
+    val_dataset = datasets.MNIST
+
+    train_loader = torch.utils.data.DataLoader
+    val_loader = torch.utils.data.DataLoader
+
+    def __init__(
+        self,
+        root: Path,
+        x_mean: float,
+        x_std: float,
+        batch_size: int,
+    ):
+        self.transform = transforms.Compose([
+            transforms.RandomApply(
+                [
+                    transforms.RandomAffine(
+                        degrees=(0, 0),
+                        translate=(0, 0),
+                        scale=(1, 1),
+                        shear=(0, 0)
+                    )
+                ],
+                p=0.75
+            ),                                       # PIL Image
+            transforms.ToTensor(),                    # (C, H, W)
+            transforms.Normalize((x_mean,), (x_std,)) # (C, H, W)
+        ])
+
+        self.train_dataset = datasets.MNIST(root=root, train=True, download=True, transform=self.transform)
+        self.val_dataset = datasets.MNIST(root=root, train=False, download=True, transform=self.transform)
+
+        self.train_loader = torch.utils.data.DataLoader(self.train_dataset, batch_size=batch_size, shuffle=True)
+        self.val_loader = torch.utils.data.DataLoader(self.val_dataset, batch_size=batch_size, shuffle=True)
+
+    def step(self) -> None:
+        pass
 
     def loader(
         self,

@@ -27,7 +27,8 @@ def estimate_loss(
     Args:
         model: The model to evaluate.
         loader: DataLoader for the dataset.
-        eval_iterations: Number of batches to evaluate.
+        eval_iterations: Number of batches to evaluate. If set to -1 the entire
+            dataset will be used.
         flatten: Whether to flatten input images (for MLPs) or not (for CNNs).
         device: Device to run evaluation on.
 
@@ -35,7 +36,8 @@ def estimate_loss(
         Mean loss and accuracy over the evaluated batches.
     '''
 
-    losses = torch.zeros((eval_iterations,), dtype=torch.float32)
+    n = eval_iterations if eval_iterations != -1 else len(loader)
+    losses = torch.zeros((n,), dtype=torch.float32)
     correct = 0.0
     total = 0
 
@@ -43,15 +45,16 @@ def estimate_loss(
     images: Tensor # (B, 1, H, W)
     labels: Tensor # (B,)
     for images, labels in loader:
-        if  i == eval_iterations:
-            break
+        if eval_iterations != -1:
+            if  i == eval_iterations:
+                break
 
         x = images.to(device)
         if flatten:
             x = x.view(-1, 28*28)
         y = labels.to(device)
 
-        output = model(x)
+        output = model(x) # (B, 10)
         loss: Tensor = F.cross_entropy(output, y)
 
         losses[i] = loss.item()
@@ -63,6 +66,33 @@ def estimate_loss(
         i += 1
 
     return float(losses.mean().item()), correct / total
+
+
+def dataset_loss(
+    model: torch.nn.Module,
+    loader: torch.utils.data.DataLoader,
+    flatten: bool = False,
+    device: torch.device = None
+) -> typing.Tuple[float, float]:
+    '''
+    Calculates the average loss and accuracy over an entire dataset.
+
+    Args:
+        model: The model to evaluate.
+        loader: DataLoader for the dataset.
+        flatten: Whether to flatten input images (for MLPs) or not (for CNNs).
+        device: Device to run evaluation on.
+
+    Returns:
+        Mean loss and accuracy over the entire dataset.
+    '''
+    return estimate_loss(
+        model=model,
+        loader=loader,
+        eval_iterations=-1,
+        flatten=flatten,
+        device=device
+    )
 
 
 def print_diagnostics(

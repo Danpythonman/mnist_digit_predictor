@@ -1,0 +1,16 @@
+name: ml_cuda12.2
+channels:
+  - defaults
+dependencies:
+  - matplotlib
+  - numpy
+  - pandas
+  - python=3.12
+  - jupyterlab
+  - ipykernel
+  - pytorch
+  - pytorch-cuda
+  - torchaudio
+  - torchvision
+  - onnx
+prefix: /home/daniel/miniconda3/envs/ml_cuda12.2

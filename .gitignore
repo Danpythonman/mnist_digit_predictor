@@ -10,3 +10,16 @@ images/
 
 # Pycache files
 __pycache__/
+
+# Pip generated files
+mnist.egg-info/
+
+# IDE config
+.vscode/
+
+# Training data
+data/
+diagrams/
+
+# Trained models
+models/

@@ -20,3 +20,6 @@ mnist.egg-info/
 # Training data
 data/
 diagrams/
+
+# Trained models
+models/

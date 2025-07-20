@@ -4,7 +4,13 @@ version = "0.0.0"
 description = "MNIST digit predictor."
 authors = [{ name = "Daniel Di Giovanni", email = "dannyjdigio@gmail.com" }]
 dependencies = [
+    "fastapi",
+    "matplotlib",
     "numpy",
+    "onnxruntime",
+    "pillow",
+    "python-multipart",
+    "uvicorn"
 ]
 
 [build-system]

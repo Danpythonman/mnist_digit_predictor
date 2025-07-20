@@ -19,10 +19,10 @@ class CNN(nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.conv_1_1 = nn.Conv2d(in_channels=1, out_channels=16, kernel_size=2, padding='same')
+        self.conv_1_1 = nn.Conv2d(in_channels=1, out_channels=16, kernel_size=3, padding='same')
         self.conv_1_relu_1 = nn.ReLU()
         self.conv_1_norm = nn.BatchNorm2d(num_features=16)
-        self.conv_1_2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=2, padding='same')
+        self.conv_1_2 = nn.Conv2d(in_channels=16, out_channels=32, kernel_size=3, padding='same')
         self.conv_1_relu_2 = nn.ReLU()
         self.conv_1_pool = nn.MaxPool2d(kernel_size=2, stride=2)
         self.flatten = nn.Flatten(start_dim=1)
@@ -39,7 +39,7 @@ class CNN(nn.Module):
         x = self.conv_1_relu_2(x) # Same shape
         x = self.conv_1_pool(x)   # (B, 32, H, W) -> (B, 32, H/2, W/2)
         x = self.flatten(x)       # (B, 32, H/2, H/2) -> (B, 32 * H/2 * W/2)
-        x = self.linear(x)
+        x = self.linear(x)        # (B, 32 * H/2 * W/2) -> (B, 10)
         return x
 
 

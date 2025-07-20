@@ -4,6 +4,7 @@ import pandas as pd
 import torch
 import torch.nn.functional as F
 from torch import Tensor
+from tqdm import tqdm
 
 from mnist.model.dataloader import DataLoaderScheduler
 
@@ -132,7 +133,9 @@ def train(
     optimizer: torch.optim.Optimizer,
     scheduler: torch.optim.lr_scheduler.LRScheduler,
     flatten: bool = False,
-    device: torch.device = None
+    device: torch.device = None,
+    quiet: bool = False,
+    show_progress: bool = False
 ) -> pd.DataFrame:
     '''
     Trains the model using a custom optimizer and learning rate scheduler.
@@ -166,18 +169,17 @@ def train(
     diagnostics: DiagnosticList = []
     epoch = 0
 
-    while True:
+    epoch_iter = tqdm(range(epochs)) if show_progress else range(epochs)
+
+    for epoch in epoch_iter:
         model.eval()
         train_loss, train_accuracy = estimate_loss(model, train_loader, 100, flatten=flatten, device=device)
         val_loss, val_accuracy = estimate_loss(model, val_loader, 100, flatten=flatten, device=device)
         lr = scheduler.get_last_lr()[0]
 
-        print_diagnostics(epoch, lr, train_loss, train_accuracy, val_loss, val_accuracy)
+        if not quiet:
+            print_diagnostics(epoch, lr, train_loss, train_accuracy, val_loss, val_accuracy)
         diagnostics.append((epoch, lr, train_loss, train_accuracy, val_loss, val_accuracy))
-
-        if epoch == epochs:
-            break
-        epoch += 1
 
         images: Tensor # (B, 1, H, W)
         labels: Tensor # (B,)

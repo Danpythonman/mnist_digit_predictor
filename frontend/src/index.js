@@ -1,4 +1,9 @@
 /**
+ * API URL for the backend server hosting the digit prediction model.
+ */
+const apiUrl = import.meta.env.VITE_API_URL;
+
+/**
  * Canvas HTML element.
  */
 const canvas = document.getElementById("can");

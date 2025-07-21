@@ -23,3 +23,12 @@ diagrams/
 
 # Trained models
 models/
+
+# NPM dependencies
+node_modules/
+
+# Vite build output
+dist/
+
+# Frontend production environment variables
+frontend/.env.production

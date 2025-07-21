@@ -150,7 +150,7 @@ async function saveAndSendCanvasImage() {
     try {
         // Send request to server
         const response = await fetch(
-            "/predict",
+            `${apiUrl}/predict`,
             {
                 method: "POST",
                 body: formData

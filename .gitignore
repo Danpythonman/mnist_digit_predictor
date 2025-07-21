@@ -23,6 +23,7 @@ diagrams/
 
 # Trained models
 models/
+model.onnx
 
 # NPM dependencies
 node_modules/

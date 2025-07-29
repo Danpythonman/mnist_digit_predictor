@@ -4,6 +4,12 @@
 const apiUrl = import.meta.env.VITE_API_URL;
 
 /**
+ * The format in which to send the image to the backend (either form data or
+ * base64).
+ */
+const imageSendFormat = import.meta.env.VITE_IMAGE_SEND_FORMAT;
+
+/**
  * Canvas HTML element.
  */
 const canvas = document.getElementById("can");
@@ -132,6 +138,53 @@ function dataURLToBlob(dataURL) {
 }
 
 /**
+ * Sends the canvas as form data in an API request to the backend.
+ *
+ * @param {string} dataURL The data URL of the image.
+ *
+ * @returns {Promise<Response>} The response from the backend.
+ */
+async function sendCanvasAsFormData(dataURL) {
+    // Convert canvas PNG URL to blob
+    const blob = dataURLToBlob(dataURL);
+
+    // Make form data with the canvas image to send to server
+    const formData = new FormData();
+    formData.append("file", blob, "digit.png");
+
+    // Send request to server
+    return await fetch(
+        `${apiUrl}/predict`,
+        {
+            method: "POST",
+            body: formData
+        }
+    );
+}
+
+/**
+ * Sends the canvas as a base64 string in an API request to the backend.
+ *
+ * @param {string} dataURL The data URL of the image.
+ *
+ * @returns {Promise<Response>} The response from the backend.
+ */
+async function sendCanvasAsBase64(dataURL) {
+    // Strip off the "data:image/png;base64," prefix
+    const base64Image = dataURL.split(",")[1];
+
+    // Send request to server
+    return await fetch(
+        `${apiUrl}/base64/predict`,
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: base64Image })
+        }
+    );
+}
+
+/**
  * Saves the canvas drawing as an image and sends it to the server for
  * prediction. If successful, the prediction, its confidence, and the
  * preprocessed image from the server are all displayed.
@@ -140,22 +193,14 @@ async function saveAndSendCanvasImage() {
     // Get canvas as PNG
     const dataURL = canvas.toDataURL("image/png");
 
-    // Convert canvas PNG URL to blob
-    const blob = dataURLToBlob(dataURL);
-
-    // Make form data with the canvas image to send to server
-    const formData = new FormData();
-    formData.append("file", blob, "digit.png");
-
     try {
-        // Send request to server
-        const response = await fetch(
-            `${apiUrl}/predict`,
-            {
-                method: "POST",
-                body: formData
-            }
-        );
+        // Choose the format in which to send the canvas image
+        const sendCanvas = (imageSendFormat === "BASE64")
+            ? sendCanvasAsBase64
+            : sendCanvasAsFormData;
+
+        // Send the canvas image to the backend
+        const response = await sendCanvas(dataURL);
 
         // Handle the server's response
         const result = await response.json();

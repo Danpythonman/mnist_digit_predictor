@@ -154,7 +154,7 @@ async function sendCanvasAsFormData(dataURL) {
 
     // Send request to server
     return await fetch(
-        `${apiUrl}/predict`,
+        `${apiUrl}`,
         {
             method: "POST",
             body: formData
@@ -175,7 +175,7 @@ async function sendCanvasAsBase64(dataURL) {
 
     // Send request to server
     return await fetch(
-        `${apiUrl}/base64/predict`,
+        `${apiUrl}`,
         {
             method: "POST",
             headers: { "Content-Type": "application/json" },

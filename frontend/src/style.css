@@ -61,6 +61,7 @@ p {
 #can {
     display: block;
     margin: 10px auto;
+    background-color: black;
 }
 
 #processed-image {

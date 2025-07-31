@@ -24,12 +24,3 @@ diagrams/
 # Trained models
 models/
 model.onnx
-
-# NPM dependencies
-node_modules/
-
-# Vite build output
-dist/
-
-# Frontend production environment variables
-frontend/.env.production

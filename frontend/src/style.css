@@ -110,7 +110,31 @@ footer {
     justify-content: center;
 }
 
-footer div {
+footer div.jupyter-links {
+    margin-top: 35px;
+    margin-bottom: 50px;
+}
+
+footer div.jupyter-link-div {
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    padding-bottom: 5px;
+}
+
+footer div.jupyter-links h3 {
+    font-family: Arial, Helvetica, sans-serif;
+    text-align: center;
+}
+
+footer div.jupyter-links a {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #0b5b9f;
+    font-size: large;
+    text-decoration: 1px underline;
+}
+
+footer div.github-link-div {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -118,9 +142,10 @@ footer div {
 
 footer img {
     padding-right: 5px;
+    vertical-align: middle;
 }
 
-footer a {
+footer div.github-link-div a {
     font-family: Arial, Helvetica, sans-serif;
     text-decoration: 2px underline;
     color: black;
@@ -128,6 +153,6 @@ footer a {
     font-weight: bold;
 }
 
-footer a:hover {
+footer div a:hover {
     text-decoration: none;
 }

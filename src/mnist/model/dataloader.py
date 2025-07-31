@@ -92,7 +92,8 @@ class StepDataLoaderScheduler(DataLoaderScheduler):
         scale: float,
         shear: float,
         warmup_steps: int = 0,
-        step_size: int = 1
+        step_size: int = 1,
+        resize_image_size: typing.Optional[typing.Tuple[int, int]] = None
     ):
         self.epochs = epochs
         self.warmup_steps = warmup_steps
@@ -114,7 +115,7 @@ class StepDataLoaderScheduler(DataLoaderScheduler):
         self.shear_f = shear
         self.shear_i = 0.0
 
-        self.transform = transforms.Compose([
+        transforms_to_apply = [
             transforms.RandomApply(
                 [
                     transforms.RandomAffine(
@@ -128,7 +129,11 @@ class StepDataLoaderScheduler(DataLoaderScheduler):
             ),                                       # PIL Image
             transforms.ToTensor(),                    # (C, H, W)
             transforms.Normalize((x_mean,), (x_std,)) # (C, H, W)
-        ])
+        ]
+        if resize_image_size is not None:
+            transforms_to_apply.insert(0, transforms.Resize(resize_image_size))
+
+        self.transform = transforms.Compose(transforms_to_apply)
 
         self.train_dataset = datasets.MNIST(root=root, train=True, download=True, transform=self.transform)
         self.val_dataset = datasets.MNIST(root=root, train=False, download=True, transform=self.transform)

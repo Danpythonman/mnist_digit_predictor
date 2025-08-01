@@ -1,0 +1,3 @@
+# Mark generated HTML files so GitHub Linguist ignores them
+frontend/public/exploration.min.html linguist-generated
+frontend/public/improving.min.html linguist-generated

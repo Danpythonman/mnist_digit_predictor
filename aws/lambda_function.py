@@ -1,8 +1,10 @@
 import base64
+from  contextlib import contextmanager
 import io
 import json
 import logging
 from pathlib import Path
+import time
 import typing
 
 import numpy as np
@@ -12,6 +14,15 @@ from PIL import Image
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+
+@contextmanager
+def timed(logger: logging.Logger, action: str):
+    logger.info(f'Starting {action}...')
+    t0 = time.time()
+    yield
+    t1 = time.time()
+    logger.info(f'{action} took {(t1 - t0)*1000:.4f}ms')
 
 
 def preprocess_image(image: Image.Image) -> np.ndarray:
@@ -28,7 +39,7 @@ def preprocess_image(image: Image.Image) -> np.ndarray:
 
     n = (n - x_mean) / x_std
 
-    n = n.reshape(1, 1, 28, 28)
+    n = n.reshape(1, 1, 64, 64)
 
     return n
 
@@ -41,6 +52,7 @@ def softmax(x: np.ndarray, axis: typing.Optional[int] = None) -> np.ndarray:
 
 def handler(event, context):
     logger.info(f'Starting execution for request id: {context.aws_request_id}')
+    t0 = time.time()
 
     model_path = Path('model.onnx')
     if not model_path.exists():
@@ -51,7 +63,8 @@ def handler(event, context):
         logger.error('Event does not have a body')
         return {'statusCode': 400, 'body': 'Event does not have a body'}
 
-    body = json.loads(event['body'])
+    with timed(logger, 'Parsing request body'):
+        body = json.loads(event['body'])
 
     if 'image' not in body:
         logger.error('Body does not have an image property')
@@ -61,25 +74,27 @@ def handler(event, context):
 
     logger.info(f'First 8 characters of base64 image: {str(image_base64)[:8]}')
 
-    image_bytes = base64.b64decode(image_base64)
+    with timed(logger, 'Decoding base64 image'):
+        image_bytes = base64.b64decode(image_base64)
 
-    logger.info('Starting ONNX inference session')
-    session = ort.InferenceSession(str(model_path))
+    with timed(logger, 'Constructing ONNX inference session'):
+        session = ort.InferenceSession(str(model_path))
 
-    logger.info('Opening image')
-    image = Image.open(io.BytesIO(image_bytes)).convert('L')
-    image = image.resize((28, 28))
+    with timed(logger, 'Opening image'):
+        image = Image.open(io.BytesIO(image_bytes)).convert('L')
 
-    logger.info('Preprocessing image')
-    n = preprocess_image(image)
+    with timed(logger, 'Preprocessing image'):
+        image = image.resize((64, 64))
+        n = preprocess_image(image)
 
-    logger.info('Running inference')
-    outputs = session.run(None, {'input': n})
+    with timed(logger, 'Running inference'):
+        outputs = session.run(None, {'input': n})
 
     prediction = np.argmax(outputs[0], axis=1)[0]
     confidence = softmax(outputs[0], axis=1)[0][prediction] * 100
 
-    logger.info(f'Returning prediction={int(prediction)}, confidence={float(confidence)}')
+    t1 = time.time()
+    logger.info(f'Request took {(t1-t1)*1000:.4f}ms. Returning prediction={int(prediction)}, confidence={float(confidence)}.')
 
     return {
         'statusCode': 200,

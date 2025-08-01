@@ -41,6 +41,6 @@ docker push "${ECR_IMAGE_URI}"
 
 # Update Lambda function to use the new image
 aws lambda update-function-code \
-  --function-name "${LAMBDA_FUNCTION_NAME}" \
-  --image-uri "${ECR_IMAGE_URI}" \
-  --region "${AWS_REGION}"
+    --function-name "${LAMBDA_FUNCTION_NAME}" \
+    --image-uri "${ECR_IMAGE_URI}" \
+    --region "${AWS_REGION}"

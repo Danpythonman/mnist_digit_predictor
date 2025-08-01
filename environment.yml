@@ -13,4 +13,7 @@ dependencies:
   - torchaudio
   - torchvision
   - onnx
+  - onnxruntime
+  - seaborn
+  - scikit-learn
 prefix: /home/daniel/miniconda3/envs/ml_cuda12.2
